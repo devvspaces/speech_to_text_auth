@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+<script src="https://www.WebRTC-Experiment.com/RecordRTC.js"></script>
+
+<body>
+    <header>
+        <h1 class="header__title">Real-Time Transcription</h1>
+        <p class="header__sub-title">Try AssemblyAI's new real-time transcription endpoint!</p>
+    </header>
+    <div class="real-time-interface">
+        <p id="real-time-title" class="real-time-interface__title">Click start to begin recording!</p>
+        <p id="button" class="real-time-interface__button">Start</p>
+        <p id="message" class="real-time-interface__message"></p>
+    </div>
+    <script>
+
+        // required dom elements
+        const buttonEl = document.getElementById('button');
+        const messageEl = document.getElementById('message');
+        const titleEl = document.getElementById('real-time-title');
+
+        let full_data = "";
+
+        // initial states and global variables
+        messageEl.style.display = 'none';
+        let isRecording = false;
+        let socket;
+        let recorder;
+
+        const run = async () => {
+            isRecording = !isRecording;
+            buttonEl.innerText = isRecording ? 'Stop' : 'Record';
+            titleEl.innerText = isRecording ? 'Click stop to end recording!' : 'Click start to begin recording!'
+
+            if (!isRecording) {
+
+                if (recorder) {
+                    await recorder.stopRecording(function () {
+                        let blob = recorder.getBlob();
+
+                        console.log(blob)
+
+                        const x = new FileReader();
+                        x.onload = () => {
+                            const base64data = x.result;
+                            console.log(base64data)
+                        };
+                        x.readAsDataURL(blob);
+                    });
+
+                    // recorder = null;
+                }
+
+                // console.log(full_data)
+
+                // if (socket) {
+                //     socket.send(JSON.stringify({ terminate_session: true }));
+                //     socket.close();
+                //     socket = null;
+                // }
+
+            } else {
+                // get session token from backend
+                // const response = await fetch('http://localhost:8000');
+                // const data = await response.json();
+
+                // if (data.error) {
+                //     alert(data.error)
+                // }
+
+                // const { token } = data;
+
+                // establish wss with AssemblyAI at 16000 sample rate
+                // socket = new WebSocket(`wss://api.assemblyai.com/v2/realtime/ws?sample_rate=16000&token=${token}`);
+
+                // handle incoming messages to display transcription to the DOM
+                // const texts = {};
+                // socket.onmessage = (message) => {
+                //     let msg = '';
+                //     const res = JSON.parse(message.data);
+                //     texts[res.audio_start] = res.text;
+                //     const keys = Object.keys(texts);
+                //     keys.sort((a, b) => a - b);
+                //     for (const key of keys) {
+                //         if (texts[key]) {
+                //             msg += ` ${texts[key]}`;
+                //         }
+                //     }
+                //     messageEl.innerText = msg;
+                // };
+
+                // handle error
+                // socket.onerror = (event) => {
+                //     console.error(event);
+                //     socket.close();
+                // }
+
+                // handle socket close
+                // socket.onclose = event => {
+                //     console.log(event);
+                //     socket = null;
+                // }
+
+                function stream(cb) {
+                    navigator.mediaDevices.getUserMedia({ audio: true })
+                        .then(async (stream) => {
+                            recorder = new RecordRTC(stream, {
+                                type: 'audio',
+                                mimeType: 'audio/webm;codecs=pcm', // endpoint requires 16bit PCM audio
+                                recorderType: StereoAudioRecorder,
+                                timeSlice: 250, // set 250 ms intervals of data
+                                desiredSampRate: 16000,
+                                numberOfAudioChannels: 1, // real-time requires only one channel
+                                bufferSize: 4096,
+                                audioBitsPerSecond: 128000,
+                                // ondataavailable: (blob) => {
+                                //     const reader = new FileReader();
+                                //     reader.onload = () => {
+                                //         const base64data = reader.result;
+                                //         cb(base64data)
+                                //     };
+                                //     reader.readAsDataURL(blob);
+                                // },
+                            });
+
+                            recorder.startRecording();
+
+                            // const sleep = m => new Promise(r => setTimeout(r, m));
+                            // await sleep(3000);
+
+                            // recorder.stopRecording(function () {
+                            //     let blob = recorder.getBlob();
+                            //     console.log(blob)
+                            //     invokeSaveAsDialog(blob);
+                            // });
+                        })
+                        .catch((err) => console.error(err));
+                }
+
+                stream((base64data) => {
+                    console.log("Getting Part!")
+                    full_data += base64data.split('base64,')[1];
+                })
+
+                // handle socket open
+                // socket.onopen = () => {
+                //     // begin recording
+                //     messageEl.style.display = '';
+                //     stream((base64data) => {
+                //         // audio data must be sent as a base64 encoded string
+                //         if (socket) {
+                //             socket.send(JSON.stringify({ audio_data: base64data.split('base64,')[1] }));
+                //         }
+                //     });
+                // };
+            }
+        };
+
+        buttonEl.addEventListener('click', () => run());
+
+    </script>
+</body>
+
+</html>
