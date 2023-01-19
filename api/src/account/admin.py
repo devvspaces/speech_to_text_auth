@@ -40,4 +40,3 @@ class ProfileAdmin(admin.ModelAdmin):
     list_display = ('fullname', 'sex', 'country', 'phone',)
     search_fields = ('fullname', 'country', 'phone',)
     list_filter = ('sex',)
-    ordering = ('-created',)
