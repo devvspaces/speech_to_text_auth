@@ -90,8 +90,12 @@ class UserAPIView(generics.RetrieveAPIView):
         return User.objects.get(id=self.request.user.id)
 
 
-class SpeechToTextView(generics.GenericAPIView):
-    def post(self, *args, **kwargs):
+class SpeechToTextView(APIView):
+
+    @swagger_auto_schema(
+        request_body=serializers.SpeechBody,
+    )
+    def post(self, request, *args, **kwargs):
         """
         Convert speech to text, using Google Speech Recognition API
         Accepts a base64 encoded string of audio data
@@ -100,11 +104,11 @@ class SpeechToTextView(generics.GenericAPIView):
             Response: Response object with text
         """
         try:
-            r = sr.Recognizer()
-            record: str = self.request.POST.get('record')
+            record: str = self.request.data.get('record')
             decoded_b64 = base64.b64decode(record)
 
             # Convert decoded_b64 to in-memory bytes buffer
+            r = sr.Recognizer()
             with sr.AudioFile(io.BytesIO(decoded_b64)) as source:
                 # listen for the data (load audio to memory)
                 audio_data = r.record(source)
@@ -112,7 +116,8 @@ class SpeechToTextView(generics.GenericAPIView):
                 text = r.recognize_google(audio_data)
 
             return Response(data={'text': text})
-        except Exception:
+        except Exception as e:
+            print(e)
             return Response(
                 data={'message': "Error converting speech to text"},
                 status=status.HTTP_400_BAD_REQUEST)

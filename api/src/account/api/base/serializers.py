@@ -13,6 +13,10 @@ access token every {settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']} minutes ")
         help_text='Used in headers to authenticate users')
 
 
+class SpeechBody(serializers.Serializer):
+    record = serializers.CharField()
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
         write_only=True, required=True, validators=[validate_password])

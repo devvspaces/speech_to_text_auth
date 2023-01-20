@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react'
+import React, { useEffect } from 'react'
 
-import { Flex, Heading, Input, Button, Radio, RadioGroup, Stack, Text, Alert, AlertIcon, AlertTitle, AlertDescription, Box, CloseButton } from '@chakra-ui/react';
+import { Flex, Heading, Button, Text, useColorModeValue } from '@chakra-ui/react';
 
 
 type User = {
@@ -16,42 +16,53 @@ type User = {
 
 const IndexPage = ({ user }: { user: User }) => {
 
+    console.log(user)
+
+    const formBg = useColorModeValue("gray.200", "gray.700");
+
+    const logoutClick = async () => {
+        const response = await fetch('/api/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        if (response.status === 200) {
+            window.location.href = '/'
+        }
+    }
+
+    // Speak after user is logged in
+    useEffect(() => {
+        const msg = new SpeechSynthesisUtterance(`You are successfully logged in, ${user.profile.fullname}. Explore the website`);
+        window.speechSynthesis.speak(msg);
+    }, [])
+
     return (
 
-        <>
+        <Flex padding={"10rem 0"} alignItems="center" justifyContent="center">
 
-            <Alert status={'success'} mb={4} variant='left-accent'>
-                <AlertIcon />
-                <AlertTitle>Logged In</AlertTitle>
-                <AlertDescription>
-                    You are logged in as {user.email}
-                </AlertDescription>
-            </Alert>
+            <Flex direction="column" background={formBg} padding={12} rounded={6} width={"25vw"}>
+                <Heading mb={6}>Profile</Heading>
 
-            <Flex height="100vh" padding={"10rem 0"} alignItems="center" justifyContent="center">
+                <Text fontWeight={'bold'} mb={2}>Fullname</Text>
+                <Text mb={6}>{user.profile.fullname || "-"}</Text>
 
-                <Flex direction="column" background="gray.200" padding={12} rounded={6} width={"25vw"}>
-                    <Heading mb={6}>Profile</Heading>
+                <Text fontWeight={'bold'} mb={2}>Email</Text>
+                <Text mb={6}>{user.email}</Text>
 
-                    <Text fontWeight={'bold'} mb={2}>Fullname</Text>
-                    <Text mb={6}>{user.profile.fullname}</Text>
+                <Text fontWeight={'bold'} mb={2}>Country</Text>
+                <Text mb={6}>{user.profile.country || "-"}</Text>
 
-                    <Text fontWeight={'bold'} mb={2}>Email</Text>
-                    <Text mb={6}>{user.email}</Text>
+                <Text fontWeight={'bold'} mb={2}>Phone</Text>
+                <Text mb={6}>{user.profile.phone || "-"}</Text>
 
-                    <Text fontWeight={'bold'} mb={2}>Country</Text>
-                    <Text mb={6}>{user.profile.country}</Text>
+                <Text fontWeight={'bold'} mb={2}>Sex</Text>
+                <Text mb={6}>{user.profile.sex || "-"}</Text>
 
-                    <Text fontWeight={'bold'} mb={2}>Phone</Text>
-                    <Text mb={6}>{user.profile.phone}</Text>
-
-                    <Text fontWeight={'bold'} mb={2}>Sex</Text>
-                    <Text mb={6}>{user.profile.sex}</Text>
-
-                </Flex>
+                <Button onClick={logoutClick} colorScheme='red'>Logout</Button>
             </Flex>
-
-        </>
+        </Flex>
 
     )
 
@@ -84,6 +95,19 @@ export const getServerSideProps = async (context: any) => {
             'Authorization': `Bearer ${token}`
         },
     })
+
+    if (response.status === 401) {
+
+        // Delete token cookie
+        res.setHeader('Set-Cookie', `token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`)
+
+        return {
+            redirect: {
+                destination: '/',
+                permanent: false
+            }
+        }
+    }
 
     const result: User = await response.json()
 
