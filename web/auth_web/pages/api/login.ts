@@ -3,7 +3,7 @@ import { NextApiResponse, NextApiRequest } from "next"
 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    // Make a request to the backend to register the user
+    // Make a request to the backend to login the user
     const BASE_URL = 'http://localhost:8000/api/v1'
     const response = await fetch(`${BASE_URL}/account/login/`, {
         method: 'POST',

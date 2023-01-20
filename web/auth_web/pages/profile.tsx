@@ -16,8 +16,6 @@ type User = {
 
 const IndexPage = ({ user }: { user: User }) => {
 
-    console.log(user)
-
     const formBg = useColorModeValue("gray.200", "gray.700");
 
     const logoutClick = async () => {
@@ -34,7 +32,7 @@ const IndexPage = ({ user }: { user: User }) => {
 
     // Speak after user is logged in
     useEffect(() => {
-        const msg = new SpeechSynthesisUtterance(`You are successfully logged in, ${user.profile.fullname}. Explore the website`);
+        const msg = new SpeechSynthesisUtterance(`Welcome ${user.profile.fullname}. Enjoy your stay.`);
         window.speechSynthesis.speak(msg);
     }, [])
 
@@ -78,6 +76,7 @@ export const getServerSideProps = async (context: any) => {
     const { token } = cookies;
 
     if (!token) {
+        // User is not logged in yet
         return {
             redirect: {
                 destination: '/',
@@ -97,8 +96,8 @@ export const getServerSideProps = async (context: any) => {
     })
 
     if (response.status === 401) {
-
-        // Delete token cookie
+        // Token has expired
+        // Delete token cookie and redirect to login
         res.setHeader('Set-Cookie', `token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`)
 
         return {

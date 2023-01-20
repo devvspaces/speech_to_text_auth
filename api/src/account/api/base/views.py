@@ -116,8 +116,7 @@ class SpeechToTextView(APIView):
                 text = r.recognize_google(audio_data)
 
             return Response(data={'text': text})
-        except Exception as e:
-            print(e)
+        except Exception:
             return Response(
                 data={'message': "Error converting speech to text"},
                 status=status.HTTP_400_BAD_REQUEST)

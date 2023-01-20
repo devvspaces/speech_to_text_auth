@@ -69,7 +69,7 @@ export const createSumbitHandler = ({
     const result = await response.json()
 
     // Handle the response
-    if (response.status === 200) {
+    if (response.status === 200 || response.status === 201) {
         toast({
             title: toastTitle,
             description: toastDescription,
