@@ -19,6 +19,8 @@
 
 This is a SpeechAuthentication project built using Next.js, TypeScript, and Django Rest Framework as the backend. Users can say their information to create an account and login. Modularity and DRY principles are followed. It's easy to modify speech to text for other complex fields like Select and so much more.
 
+![image](https://user-images.githubusercontent.com/77179231/213792225-f176c120-d270-4594-9be6-9d88be991906.png)
+
 ## 🏁 Getting Started <a name = "getting_started"></a>
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [deployment](#deployment) for notes on how to deploy the project on a live system.
@@ -35,7 +37,7 @@ For installing the project, you will need to have
 
 A step by step series of examples that tell you how to get a development environment running.
 
-Setting Up the API:
+#### Setting Up the API:
 
 Clone the project
 
@@ -94,7 +96,7 @@ python manage.py runserver
 > API server will run on `http://localhost:8000/`. Visit [Swagger](http://localhost:8000/docs/) to read the Swagger API documentation.
 > Make sure the API server is running on port `8000` if changed you will have to change it in the frontend.
 
-Setup Frontend:
+#### Setup Frontend:
 
 Move into the `auth_web` directory from the root directory
 
